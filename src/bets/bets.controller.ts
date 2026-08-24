@@ -1,0 +1,17 @@
+import { Body, Controller, Post } from '@nestjs/common';
+import { BetsService } from './bets.service';
+
+import { CreateBetDto } from './create-bet.dto';
+
+@Controller('bets')
+export class BetsController {
+    constructor(
+  private readonly betsService: BetsService,
+) {}
+
+  @Post()
+  createBet(@Body() createBetDto: CreateBetDto) {
+    
+  }
+
+}
