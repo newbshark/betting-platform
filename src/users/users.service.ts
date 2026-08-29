@@ -1,51 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './create-user.dto';
+import { User } from './user.entity';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-    getUsers() {
-  return [
-    {
-      id: 1,
-      name: 'Vadim',
-    },
-    {
-      id: 2,
-      name: 'Alex',
-    },
-  ];
-}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
-getUserById(id: string) {
-  const users = [
-    {
-      id: 1,
-      name: 'Vadim',
-    },
-    {
-      id: 2,
-      name: 'Alex',
-    },
-  ];
-
-  const user = users.find(user => user.id === Number(id));
-
-  if (!user) {
-    throw new NotFoundException('User not found');
+  getUsers(): Promise<User[]> {
+    return this.usersRepository.findAll();
   }
 
-  return user;
+  async getUserById(id: string): Promise<User> {
+    const user = await this.usersRepository.findById(Number(id));
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  createUser(createUserDto: CreateUserDto): Promise<User> {
+    return this.usersRepository.create(createUserDto);
+  }
 }
-
-createUser(createUserDto: CreateUserDto) {
-  return {
-    id: 3,
-    name: createUserDto.name,
-  };
-
-
-}
-
-}
-
-

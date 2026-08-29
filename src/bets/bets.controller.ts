@@ -5,13 +5,8 @@ import { CreateBetDto } from './create-bet.dto';
 
 @Controller('bets')
 export class BetsController {
-    constructor(
-  private readonly betsService: BetsService,
-) {}
+  constructor(private readonly betsService: BetsService) {}
 
   @Post()
-  createBet(@Body() createBetDto: CreateBetDto) {
-    
-  }
-
+  createBet(@Body() createBetDto: CreateBetDto) {}
 }

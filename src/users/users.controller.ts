@@ -4,9 +4,7 @@ import { CreateUserDto } from './create-user.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
   getUsers() {
@@ -14,13 +12,12 @@ export class UsersController {
   }
 
   @Get(':id')
-getUserById(@Param('id') id: string) {
-  return this.usersService.getUserById(id);
-}
+  getUserById(@Param('id') id: string) {
+    return this.usersService.getUserById(id);
+  }
 
-@Post()
-createUser(@Body() createUserDto: CreateUserDto) {
-  return this.usersService.createUser(createUserDto);
+  @Post()
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createUser(createUserDto);
+  }
 }
-}
-
