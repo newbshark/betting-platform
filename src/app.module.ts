@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BetsModule } from './bets/bets.module';
-import { AppConfigModule } from './config/config.module';
+import { AppConfigModule } from './common/config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { LoggerModule } from './logger/logger.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { UsersModule } from './users/users.module';
 
 @Module({

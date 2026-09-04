@@ -1,7 +1,7 @@
 export interface Account {
   id: number;
   user_id: number;
-  balance: string; 
+  balance: string;
   created_at: Date;
   updated_at: Date;
 }

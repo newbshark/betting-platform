@@ -2,19 +2,17 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Knex } from 'knex';
 import { KNEX_CONNECTION } from '../database/database.constants';
 import { Account } from './account.entity';
-import { Money } from '../common/money/money';
 
 @Injectable()
 export class AccountsRepository {
   private static readonly TABLE_NAME = 'accounts';
 
-  constructor(@Inject(KNEX_CONNECTION) private readonly knex: Knex) { }
+  constructor(@Inject(KNEX_CONNECTION) private readonly knex: Knex) {}
 
-
-  async findByUserId(userId: number): Promise<Account | undefined> {
-    return this.knex<Account>(AccountsRepository.TABLE_NAME)
-      .where({ user_id: userId })
-      .first();
+  async findByUserId(userId: number): Promise<Account[] | undefined> {
+    return this.knex<Account>(AccountsRepository.TABLE_NAME).where({
+      user_id: userId,
+    });
   }
 
   async findById(id: number): Promise<Account | undefined> {
@@ -32,5 +30,4 @@ export class AccountsRepository {
       .returning('*');
     return account;
   }
-
 }

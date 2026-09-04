@@ -1,7 +1,7 @@
 import { Global, Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import knex, { Knex } from 'knex';
-import { AppConfigModule } from '../config/config.module';
-import { AppConfigService } from '../config/config.service';
+import { AppConfigModule } from '../common/config/config.module';
+import { AppConfigService } from '../common/config/config.service';
 import { KNEX_CONNECTION } from './database.constants';
 
 @Global()

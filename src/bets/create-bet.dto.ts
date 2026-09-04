@@ -1,9 +1,9 @@
-import { IsInt, IsNumber, IsPositive } from 'class-validator';
+import { IsInt, IsNumber, IsPositive, IsString } from 'class-validator';
 
 export class CreateBetDto {
-  @IsInt()
+  @IsString()
   @IsPositive()
-  userId!: number;
+  userId!: string; // 12332 -> UserRuslan2
 
   @IsInt()
   @IsPositive()
