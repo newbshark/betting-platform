@@ -2,12 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Knex } from 'knex';
 import { KNEX_CONNECTION } from '../database/database.constants';
 import { Account } from './account.entity';
+import { Money } from '../common/money/money';
 
 @Injectable()
 export class AccountsRepository {
   private static readonly TABLE_NAME = 'accounts';
 
-  constructor(@Inject(KNEX_CONNECTION) private readonly knex: Knex) {}
+  constructor(@Inject(KNEX_CONNECTION) private readonly knex: Knex) { }
 
   async findByUserId(userId: number): Promise<Account[] | undefined> {
     return this.knex<Account>(AccountsRepository.TABLE_NAME).where({
@@ -29,5 +30,42 @@ export class AccountsRepository {
       })
       .returning('*');
     return account;
+  }
+
+  async getBalance(accountId: number): Promise<Money> {
+    const account = await this.findById(accountId);
+    if (!account) {
+      throw new Error('Account not found');
+    }
+    return new Money(account.balance);
+  }
+
+  async lockForUpdate(accountId: number, trx: Knex.Transaction): Promise<Account> {
+    const account = await trx<Account>(AccountsRepository.TABLE_NAME)
+      .where({ id: accountId })
+      .forUpdate()
+      .first();
+
+    if (!account) {
+      throw new Error(`Account with id ${accountId} not found`);
+    }
+
+    return account;
+  }
+
+  async updateBalance(
+    accountId: number,
+    newBalance: Money,
+    trx: Knex.Transaction,
+  ): Promise<Account> {
+    const [updated] = await trx<Account>(AccountsRepository.TABLE_NAME)
+      .where({ id: accountId })
+      .update({
+        balance: newBalance.toString(),
+        updated_at: new Date(),
+      })
+      .returning('*');
+
+    return updated;
   }
 }
