@@ -14,9 +14,10 @@ export class TransactionsRepository {
     type: 'CREDIT' | 'DEBIT',
     amount: string,
     balanceAfter: string,
+    trx: Knex.Transaction,
     description?: string,
   ): Promise<Transaction> {
-    const [transaction] = await this.knex<Transaction>(
+    const [transaction] = await trx<Transaction>(
       TransactionsRepository.TABLE_NAME,
     )
       .insert({

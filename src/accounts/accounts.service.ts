@@ -69,23 +69,20 @@ export class AccountsService {
 
   async debit(
     accountId: number,
-    amount: Money,
+    amount: number,
   ): Promise<{ account: Account; transaction: any }> {
+    const moneyAmount = new Money(amount); 
     const trx = await this.knex.transaction();
 
     try {
-
       const account = await this.accountsRepository.lockForUpdate(accountId, trx);
 
-      // Проверяем баланс
       const currentBalance = new Money(account.balance);
-      if (currentBalance.compareTo(amount) < 0) {
+      if (currentBalance.compareTo(moneyAmount) < 0) {
         throw new BadRequestException('Insufficient balance');
       }
 
-
-      const newBalance = currentBalance.subtract(amount);
-
+      const newBalance = currentBalance.subtract(moneyAmount);
 
       const updatedAccount = await this.accountsRepository.updateBalance(
         accountId,
@@ -93,8 +90,14 @@ export class AccountsService {
         trx,
       );
 
-
-      const transaction = { id: 1, type: 'DEBIT', amount: amount.toString() };
+      const transaction = await this.transactionsRepository.create(
+        accountId,
+        'DEBIT',
+        moneyAmount.toString(),
+        newBalance.toString(),
+        trx,
+        `Debit ${moneyAmount.toString()} from account ${accountId}`,
+      );
 
       await trx.commit();
 
@@ -105,18 +108,18 @@ export class AccountsService {
     }
   }
 
-
   async credit(
     accountId: number,
-    amount: Money,
+    amount: number, 
   ): Promise<{ account: Account; transaction: any }> {
+    const moneyAmount = new Money(amount); 
     const trx = await this.knex.transaction();
 
     try {
       const account = await this.accountsRepository.lockForUpdate(accountId, trx);
 
       const currentBalance = new Money(account.balance);
-      const newBalance = currentBalance.add(amount);
+      const newBalance = currentBalance.add(moneyAmount);
 
       const updatedAccount = await this.accountsRepository.updateBalance(
         accountId,
@@ -124,7 +127,14 @@ export class AccountsService {
         trx,
       );
 
-      const transaction = { id: 1, type: 'CREDIT', amount: amount.toString() };
+      const transaction = await this.transactionsRepository.create(
+        accountId,
+        'CREDIT',
+        moneyAmount.toString(),
+        newBalance.toString(),
+        trx,
+        `Credit ${moneyAmount.toString()} to account ${accountId}`,
+      );
 
       await trx.commit();
 

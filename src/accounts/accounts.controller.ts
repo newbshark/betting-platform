@@ -1,69 +1,37 @@
-import { Controller, Post, Body, Get, Param, BadRequestException } from '@nestjs/common';
+// src/accounts/accounts.controller.ts
+import { Controller, Post, Body, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
-import { CreateAccountDto } from './create-account.dto';
-import { Money } from '../common/money/money';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { CreditAccountDto } from './dto/credit-account.dto';
+import { DebitAccountDto } from './dto/debit-account.dto';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) { }
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
-  async createAccount(@Body() createAccountDto: CreateAccountDto) {
-    return this.accountsService.createAccount(createAccountDto.userId);
+  async createAccount(@Body() dto: CreateAccountDto) {
+    return this.accountsService.createAccount(dto.userId);
   }
 
   @Get(':userId/balance')
-  async getBalance(@Param('userId') userId: string) {
-    const balance = await this.accountsService.getBalance(Number(userId));
-    return {
-      userId: Number(userId),
-      balance: balance.toString(),
-    };
+  async getBalance(@Param('userId', ParseIntPipe) userId: number) {
+    return this.accountsService.getBalance(userId);
   }
 
   @Post(':accountId/credit')
   async credit(
-    @Param('accountId') accountId: string,
-    @Body('amount') amount: string,
+    @Param('accountId', ParseIntPipe) accountId: number,
+    @Body() dto: CreditAccountDto,
   ) {
-    const accountIdNum = parseInt(accountId, 10);
-    if (isNaN(accountIdNum) || accountIdNum <= 0) {
-      throw new BadRequestException('Invalid accountId');
-    }
-    if (!amount) {
-      throw new BadRequestException('Amount is required');
-    }
-
-    const moneyAmount = new Money(amount);
-    const result = await this.accountsService.credit(accountIdNum, moneyAmount);
-
-    return {
-      accountId: accountIdNum,
-      newBalance: result.account.balance,
-      transaction: result.transaction,
-    };
+    return this.accountsService.credit(accountId, dto.amount);
   }
 
   @Post(':accountId/debit')
   async debit(
-    @Param('accountId') accountId: string,
-    @Body('amount') amount: string,
+    @Param('accountId', ParseIntPipe) accountId: number,
+    @Body() dto: DebitAccountDto,
   ) {
-    const accountIdNum = parseInt(accountId, 10);
-    if (isNaN(accountIdNum) || accountIdNum <= 0) {
-      throw new BadRequestException('Invalid accountId');
-    }
-    if (!amount) {
-      throw new BadRequestException('Amount is required');
-    }
-
-    const moneyAmount = new Money(amount);
-    const result = await this.accountsService.debit(accountIdNum, moneyAmount);
-
-    return {
-      accountId: accountIdNum,
-      newBalance: result.account.balance,
-      transaction: result.transaction,
-    };
+    return this.accountsService.debit(accountId, dto.amount);
   }
 }

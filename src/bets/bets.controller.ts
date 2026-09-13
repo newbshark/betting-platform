@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { BetsService } from './bets.service';
 
-import { CreateBetDto } from './create-bet.dto';
+import { CreateBetDto } from './dto/create-bet.dto';
 
 @Controller('bets')
 export class BetsController {
