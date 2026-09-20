@@ -4,10 +4,11 @@ import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { CreditAccountDto } from './dto/credit-account.dto';
 import { DebitAccountDto } from './dto/debit-account.dto';
+import { AccountOperationResponseDto } from './dto/account-operation-response.dto';
 
 @Controller('accounts')
 export class AccountsController {
-  constructor(private readonly accountsService: AccountsService) {}
+  constructor(private readonly accountsService: AccountsService) { }
 
   @Post()
   async createAccount(@Body() dto: CreateAccountDto) {
@@ -23,7 +24,7 @@ export class AccountsController {
   async credit(
     @Param('accountId', ParseIntPipe) accountId: number,
     @Body() dto: CreditAccountDto,
-  ) {
+  ): Promise<AccountOperationResponseDto> {
     return this.accountsService.credit(accountId, dto.amount);
   }
 
@@ -31,7 +32,7 @@ export class AccountsController {
   async debit(
     @Param('accountId', ParseIntPipe) accountId: number,
     @Body() dto: DebitAccountDto,
-  ) {
+  ): Promise<AccountOperationResponseDto> {
     return this.accountsService.debit(accountId, dto.amount);
   }
 }
