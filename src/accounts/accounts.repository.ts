@@ -23,6 +23,12 @@ export class AccountsRepository {
       .first();
   }
 
+  async findPrimaryByUserId(userId: number): Promise<Account | undefined> {
+  return this.knex<Account>(AccountsRepository.TABLE_NAME)
+    .where({ user_id: userId })
+    .first();
+}
+
   async create(userId: number): Promise<Account> {
     const [account] = await this.knex<Account>(AccountsRepository.TABLE_NAME)
       .insert({

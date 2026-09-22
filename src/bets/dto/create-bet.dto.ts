@@ -1,19 +1,15 @@
-import { IsInt, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsInt, IsNumber, IsPositive } from 'class-validator';
 
 export class CreateBetDto {
-  @IsString()
+  @IsInt()
   @IsPositive()
-  userId!: string; // 12332 -> UserRuslan2
+  userId!: number;
 
   @IsInt()
   @IsPositive()
-  eventId!: number;
+  outcomeId!: number;
 
   @IsNumber()
   @IsPositive()
-  amount!: number;
-
-  @IsNumber()
-  @IsPositive()
-  odds!: number;
+  stake!: number;
 }

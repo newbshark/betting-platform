@@ -53,6 +53,17 @@ export class AccountsService {
     );
     return account;
   }
+
+  async getPrimaryAccountId(userId: number): Promise<number> {
+  const account = await this.accountsRepository.findPrimaryByUserId(userId);
+  if (!account) {
+    throw new NotFoundException(`No account found for user ${userId}`);
+  }
+  return account.id;
+}
+
+
+
   async getBalance(userId: number): Promise<Money> {
 
     const accounts = await this.accountsRepository.findByUserId(userId);
