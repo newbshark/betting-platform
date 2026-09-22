@@ -8,6 +8,8 @@ import { LoggerModule } from './common/logger/logger.module';
 import { UsersModule } from './users/users.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { EmailService } from './common/email-service/EmailService';
+import { EventsModule } from './events/events.module';
+import { OutcomesModule } from './outcomes/outcomes.module';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { EmailService } from './common/email-service/EmailService';
     LoggerModule,
     DatabaseModule,
     UsersModule,
+    EventsModule,
     AccountsModule,
+    OutcomesModule,
     BetsModule,
   ],
   controllers: [AppController],
