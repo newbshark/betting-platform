@@ -7,13 +7,9 @@ export class CreateBetDto {
 
   @IsInt()
   @IsPositive()
-  eventId!: number;
+  outcomeId!: number;
 
   @IsNumber()
   @IsPositive()
-  amount!: number;
-
-  @IsNumber()
-  @IsPositive()
-  odds!: number;
+  stake!: number;
 }
