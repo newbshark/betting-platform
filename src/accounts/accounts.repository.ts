@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { Knex } from 'knex';
 import { KNEX_CONNECTION } from '../database/database.constants';
 import { Account } from './account.entity';
-import { Transaction } from '../transactions/transaction.entity'; 
+import { Transaction } from '../transactions/transaction.entity';
 import { Money } from '../common/money/money';
 
 @Injectable()
@@ -12,9 +12,9 @@ export class AccountsRepository {
   constructor(@Inject(KNEX_CONNECTION) private readonly knex: Knex) { }
 
   async findByUserId(userId: number): Promise<Account[] | undefined> {
-    return this.knex<Account>(AccountsRepository.TABLE_NAME).where({
-      user_id: userId,
-    });
+    return this.knex<Account>(AccountsRepository.TABLE_NAME)
+      .where({ user_id: userId })
+      .orderBy('id', 'asc');
   }
 
   async findById(id: number): Promise<Account | undefined> {
@@ -24,10 +24,11 @@ export class AccountsRepository {
   }
 
   async findPrimaryByUserId(userId: number): Promise<Account | undefined> {
-  return this.knex<Account>(AccountsRepository.TABLE_NAME)
-    .where({ user_id: userId })
-    .first();
-}
+    return this.knex<Account>(AccountsRepository.TABLE_NAME)
+      .where({ user_id: userId })
+      .orderBy('id', 'asc')
+      .first();
+  }
 
   async create(userId: number): Promise<Account> {
     const [account] = await this.knex<Account>(AccountsRepository.TABLE_NAME)
@@ -77,81 +78,81 @@ export class AccountsRepository {
   }
 
   async creditWithTransaction(
-  accountId: number,
-  amount: Money,
-): Promise<{ account: Account; transaction: Transaction }> {
-  // 1. Открываем транзакцию
-  const trx = await this.knex.transaction();
+    accountId: number,
+    amount: Money,
+  ): Promise<{ account: Account; transaction: Transaction }> {
+    // 1. Открываем транзакцию
+    const trx = await this.knex.transaction();
 
-  try {
-    // 2. Блокируем счёт (FOR UPDATE)
-    const account = await this.lockForUpdate(accountId, trx);
+    try {
+      // 2. Блокируем счёт (FOR UPDATE)
+      const account = await this.lockForUpdate(accountId, trx);
 
-    // 3. Вычисляем новый баланс
-    const currentBalance = new Money(account.balance);
-    const newBalance = currentBalance.add(amount);
+      // 3. Вычисляем новый баланс
+      const currentBalance = new Money(account.balance);
+      const newBalance = currentBalance.add(amount);
 
-    // 4. Обновляем баланс
-    const updatedAccount = await this.updateBalance(accountId, newBalance, trx);
+      // 4. Обновляем баланс
+      const updatedAccount = await this.updateBalance(accountId, newBalance, trx);
 
-    // 5. Создаём запись в transactions
-    const [transaction] = await trx<Transaction>('transactions')
-      .insert({
-        account_id: accountId,
-        type: 'CREDIT',
-        amount: amount.toString(),
-        balance_after: newBalance.toString(),
-        description: `Credit ${amount.toString()} to account ${accountId}`,
-      })
-      .returning('*');
+      // 5. Создаём запись в transactions
+      const [transaction] = await trx<Transaction>('transactions')
+        .insert({
+          account_id: accountId,
+          type: 'CREDIT',
+          amount: amount.toString(),
+          balance_after: newBalance.toString(),
+          description: `Credit ${amount.toString()} to account ${accountId}`,
+        })
+        .returning('*');
 
-    // 6. Коммитим
-    await trx.commit();
+      // 6. Коммитим
+      await trx.commit();
 
-    return { account: updatedAccount, transaction };
-  } catch (error) {
-    // 7. При ошибке откатываем
-    await trx.rollback();
-    throw error;
-  }
-}
-
-async debitWithTransaction(
-  accountId: number,
-  amount: Money,
-): Promise<{ account: Account; transaction: Transaction }> {
-  const trx = await this.knex.transaction();
-
-  try {
-    const account = await this.lockForUpdate(accountId, trx);
-
-    const currentBalance = new Money(account.balance);
-
-    // Проверяем баланс
-    if (currentBalance.compareTo(amount) < 0) {
-      throw new BadRequestException('Insufficient balance');
+      return { account: updatedAccount, transaction };
+    } catch (error) {
+      // 7. При ошибке откатываем
+      await trx.rollback();
+      throw error;
     }
-
-    const newBalance = currentBalance.subtract(amount);
-
-    const updatedAccount = await this.updateBalance(accountId, newBalance, trx);
-
-    const [transaction] = await trx<Transaction>('transactions')
-      .insert({
-        account_id: accountId,
-        type: 'DEBIT',
-        amount: amount.toString(),
-        balance_after: newBalance.toString(),
-        description: `Debit ${amount.toString()} from account ${accountId}`,
-      })
-      .returning('*');
-
-    await trx.commit();
-
-    return { account: updatedAccount, transaction };
-  } catch (error) {
-    await trx.rollback();
-    throw error;
   }
-}
+
+  async debitWithTransaction(
+    accountId: number,
+    amount: Money,
+  ): Promise<{ account: Account; transaction: Transaction }> {
+    const trx = await this.knex.transaction();
+
+    try {
+      const account = await this.lockForUpdate(accountId, trx);
+
+      const currentBalance = new Money(account.balance);
+
+      // Проверяем баланс
+      if (currentBalance.compareTo(amount) < 0) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      const newBalance = currentBalance.subtract(amount);
+
+      const updatedAccount = await this.updateBalance(accountId, newBalance, trx);
+
+      const [transaction] = await trx<Transaction>('transactions')
+        .insert({
+          account_id: accountId,
+          type: 'DEBIT',
+          amount: amount.toString(),
+          balance_after: newBalance.toString(),
+          description: `Debit ${amount.toString()} from account ${accountId}`,
+        })
+        .returning('*');
+
+      await trx.commit();
+
+      return { account: updatedAccount, transaction };
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
 }

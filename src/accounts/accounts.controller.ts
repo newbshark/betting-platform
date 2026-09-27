@@ -1,10 +1,6 @@
-// src/accounts/accounts.controller.ts
-import { Controller, Post, Body, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { CreditAccountDto } from './dto/credit-account.dto';
-import { DebitAccountDto } from './dto/debit-account.dto';
-import { AccountOperationResponseDto } from './dto/account-operation-response.dto';
 
 @Controller('accounts')
 export class AccountsController {
@@ -17,22 +13,7 @@ export class AccountsController {
 
   @Get(':userId/balance')
   async getBalance(@Param('userId', ParseIntPipe) userId: number) {
-    return this.accountsService.getBalance(userId);
-  }
-
-  @Post(':accountId/credit')
-  async credit(
-    @Param('accountId', ParseIntPipe) accountId: number,
-    @Body() dto: CreditAccountDto,
-  ): Promise<AccountOperationResponseDto> {
-    return this.accountsService.credit(accountId, dto.amount);
-  }
-
-  @Post(':accountId/debit')
-  async debit(
-    @Param('accountId', ParseIntPipe) accountId: number,
-    @Body() dto: DebitAccountDto,
-  ): Promise<AccountOperationResponseDto> {
-    return this.accountsService.debit(accountId, dto.amount);
+    const balance = await this.accountsService.getBalance(userId);
+    return { balance };
   }
 }

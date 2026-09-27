@@ -7,9 +7,10 @@ import { DatabaseModule } from './database/database.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { UsersModule } from './users/users.module';
 import { AccountsModule } from './accounts/accounts.module';
-import { EmailService } from './common/email-service/EmailService';
+import { AccountsTransactionsModule } from './accounts/transactions/accounts-transactions.module';
 import { EventsModule } from './events/events.module';
 import { OutcomesModule } from './outcomes/outcomes.module';
+import { EmailModule } from './common/email-service/email.module';
 
 @Module({
   imports: [
@@ -17,12 +18,14 @@ import { OutcomesModule } from './outcomes/outcomes.module';
     LoggerModule,
     DatabaseModule,
     UsersModule,
+    EmailModule,
     EventsModule,
     AccountsModule,
+    AccountsTransactionsModule,
     OutcomesModule,
     BetsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, EmailService],
+  providers: [AppService],
 })
 export class AppModule {}

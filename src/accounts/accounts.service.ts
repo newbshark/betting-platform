@@ -1,15 +1,14 @@
 import {
   BadRequestException,
-  Injectable, NotFoundException
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { AccountsRepository } from './accounts.repository';
 import { Account } from './account.entity';
 import { UsersRepository } from '../users/users.repository';
 import { EmailService } from '../common/email-service/EmailService';
 import { AppLoggerService } from '../common/logger/logger.service';
-import { Inject } from '@nestjs/common';
 import { Money } from '../common/money/money';
-import { AccountOperationResponseDto } from './dto/account-operation-response.dto';
 
 @Injectable()
 export class AccountsService {
@@ -24,10 +23,11 @@ export class AccountsService {
     this.appLoggerService.log(
       'Starting account creation process for userId: ' + userId,
     );
+
     const existingsAccounts =
       await this.accountsRepository.findByUserId(userId);
 
-    if (existingsAccounts && existingsAccounts?.length >= 3) {
+    if (existingsAccounts && existingsAccounts.length >= 3) {
       throw new BadRequestException(
         'Maximum number of accounts reached for this user',
       );
@@ -38,12 +38,10 @@ export class AccountsService {
       throw new BadRequestException('User does not exist');
     }
 
-    const email = user.email;
-
     const account = await this.accountsRepository.create(userId);
 
     this.emailService.sendEmail(
-      email,
+      user.email,
       'New Account Created',
       `Your new account has been created successfully. Account ID: ${account.id}`,
     );
@@ -55,66 +53,18 @@ export class AccountsService {
   }
 
   async getPrimaryAccountId(userId: number): Promise<number> {
-  const account = await this.accountsRepository.findPrimaryByUserId(userId);
-  if (!account) {
-    throw new NotFoundException(`No account found for user ${userId}`);
+    const account = await this.accountsRepository.findPrimaryByUserId(userId);
+    if (!account) {
+      throw new NotFoundException(`No account found for user ${userId}`);
+    }
+    return account.id;
   }
-  return account.id;
-}
 
-
-
-  async getBalance(userId: number): Promise<Money> {
-
+  async getBalance(userId: number): Promise<string> {
     const accounts = await this.accountsRepository.findByUserId(userId);
     if (!accounts || accounts.length === 0) {
       throw new NotFoundException(`No accounts found for user ${userId}`);
     }
-    return new Money(accounts[0].balance);
-  }
-
-
-  async credit(
-    accountId: number,
-    amount: number,
-  ): Promise<AccountOperationResponseDto> {
-    const moneyAmount = new Money(amount);
-    const { account, transaction } = await this.accountsRepository.creditWithTransaction(
-      accountId,
-      moneyAmount,
-    );
-
-    return {
-      accountId: account.id,
-      newBalance: account.balance,
-      transaction: {
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.amount,
-        balanceAfter: transaction.balance_after,
-      },
-    };
-  }
-
-  async debit(
-    accountId: number,
-    amount: number,
-  ): Promise<AccountOperationResponseDto> {
-    const moneyAmount = new Money(amount);
-    const { account, transaction } = await this.accountsRepository.debitWithTransaction(
-      accountId,
-      moneyAmount,
-    );
-
-    return {
-      accountId: account.id,
-      newBalance: account.balance,
-      transaction: {
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.amount,
-        balanceAfter: transaction.balance_after,
-      },
-    };
+    return new Money(accounts[0].balance).toFixed(2);
   }
 }
