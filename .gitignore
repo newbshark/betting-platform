@@ -57,3 +57,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # TypeScript
 *.tsbuildinfo
+
+project-dump.txt
+dump.sh
+project-dump.txt
+backup.sql
+
