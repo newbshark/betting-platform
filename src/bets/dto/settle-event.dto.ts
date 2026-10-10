@@ -10,15 +10,15 @@ import {
 export class OutcomeResultDto {
   @IsInt()
   @IsPositive()
-  outcomeId!: number;
+  outcomeId: number;
 
   @IsIn(['won', 'lost', 'void'])
-  result!: 'won' | 'lost' | 'void';
+  result: 'won' | 'lost' | 'void';
 }
 
 export class SettleEventDto {
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => OutcomeResultDto)
-  outcomes!: OutcomeResultDto[];
+  outcomes: OutcomeResultDto[];
 }

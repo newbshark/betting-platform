@@ -4,8 +4,8 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  name!: string;
+  name: string;
 
   @IsDateString()
-  start_time!: string;
+  start_time: string;
 }

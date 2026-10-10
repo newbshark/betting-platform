@@ -3,13 +3,13 @@ import { IsInt, IsNumber, IsPositive } from 'class-validator';
 export class CreateBetDto {
   @IsInt()
   @IsPositive()
-  userId!: number;
+  userId: number;
 
   @IsInt()
   @IsPositive()
-  outcomeId!: number;
+  outcomeId: number;
 
   @IsNumber()
   @IsPositive()
-  stake!: number;
+  stake: number;
 }
