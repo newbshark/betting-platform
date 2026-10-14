@@ -8,7 +8,7 @@ import { BetsRepository } from './bets.repository';
 import { BetsController } from './bets.controller';
 import { SettlementService } from './settlement.service';
 import { SettlementRepository } from './settlement.repository';
-import { SettlementController } from './settlement.controller';
+import { AdminSettlementController } from './admin-settlement.controller';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { SettlementController } from './settlement.controller';
     SettlementService,
     SettlementRepository,
   ],
-  controllers: [BetsController, SettlementController],
+  controllers: [BetsController, AdminSettlementController],
   exports: [BetsService, BetsRepository, SettlementService],
 })
 export class BetsModule {}

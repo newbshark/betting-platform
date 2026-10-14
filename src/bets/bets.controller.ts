@@ -14,11 +14,11 @@ import { BetResponseDto } from './dto/bet-response.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('bets')
+@UseGuards(JwtAuthGuard)
 export class BetsController {
-  constructor(private readonly betsService: BetsService) { }
+  constructor(private readonly betsService: BetsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async createBet(
     @Req() req: any,
     @Body() dto: CreateBetDto,
@@ -27,7 +27,6 @@ export class BetsController {
   }
 
   @Get('user/:userId')
-  @UseGuards(JwtAuthGuard)
   async getUserBets(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<BetResponseDto[]> {

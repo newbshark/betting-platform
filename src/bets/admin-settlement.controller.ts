@@ -13,13 +13,13 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
-@Controller('events')
-export class SettlementController {
+@Controller('admin/events')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+export class AdminSettlementController {
   constructor(private readonly settlementService: SettlementService) {}
 
   @Post(':eventId/settle')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
   async settleEvent(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() dto: SettleEventDto,
