@@ -22,34 +22,34 @@ export class BetsService {
     private readonly outcomesRepository: OutcomesRepository,
   ) {}
 
-  async createBet(dto: CreateBetDto): Promise<BetResponseDto> {
-    const outcome = await this.outcomesRepository.findById(dto.outcomeId);
-    if (!outcome) {
-      throw new NotFoundException(`Outcome with id ${dto.outcomeId} not found`);
-    }
-    if (outcome.status !== 'open') {
-      throw new BadRequestException('Outcome is not open for betting');
-    }
-
-    const accountId = await this.accountsService.getPrimaryAccountId(dto.userId);
-
-    const odds = new Odds(outcome.odds);
-    const stake = new Money(dto.stake);
-    const potentialPayout = odds.calculatePayout(stake);
-
-    await this.accountsTransactionsService.debit(accountId, dto.stake);
-
-    const bet = await this.betsRepository.create({
-      user_id: dto.userId,
-      outcome_id: dto.outcomeId,
-      stake: stake.toString(),
-      odds: odds.toString(),
-      potential_payout: potentialPayout.toString(),
-      status: 'PENDING',
-    });
-
-    return this.toResponse(bet);
+  async createBet(dto: CreateBetDto, userId: number): Promise<BetResponseDto> {
+  const outcome = await this.outcomesRepository.findById(dto.outcomeId);
+  if (!outcome) {
+    throw new NotFoundException(`Outcome with id ${dto.outcomeId} not found`);
   }
+  if (outcome.status !== 'open') {
+    throw new BadRequestException('Outcome is not open for betting');
+  }
+
+  const accountId = await this.accountsService.getPrimaryAccountId(userId);
+
+  const odds = new Odds(outcome.odds);
+  const stake = new Money(dto.stake);
+  const potentialPayout = odds.calculatePayout(stake);
+
+  await this.accountsTransactionsService.debit(accountId, dto.stake);
+
+  const bet = await this.betsRepository.create({
+    user_id: userId,          // ← теперь из параметра, а не из dto
+    outcome_id: dto.outcomeId,
+    stake: stake.toFixed(2),
+    odds: odds.toFixed(2),
+    potential_payout: potentialPayout.toFixed(2),
+    status: 'PENDING',
+  });
+
+  return this.toResponse(bet);
+}
 
   async getUserBets(userId: number): Promise<BetResponseDto[]> {
     const bets = await this.betsRepository.findByUserId(userId);

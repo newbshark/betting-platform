@@ -11,6 +11,7 @@ import { AccountsTransactionsModule } from './accounts/transactions/accounts-tra
 import { EventsModule } from './events/events.module';
 import { OutcomesModule } from './outcomes/outcomes.module';
 import { EmailModule } from './common/email-service/email.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EmailModule } from './common/email-service/email.module';
     LoggerModule,
     DatabaseModule,
     UsersModule,
+    AuthModule,
     EmailModule,
     EventsModule,
     AccountsModule,
