@@ -1,19 +1,71 @@
-import { Injectable } from '@nestjs/common';
-
-import { CreateBetDto } from './create-bet.dto';
-import { UsersService } from '../users/users.service';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { BetsRepository } from './bets.repository';
+import { Bet } from './bet.entity';
+import { CreateBetDto } from './dto/create-bet.dto';
+import { BetResponseDto } from './dto/bet-response.dto';
+import { AccountsService } from '../accounts/accounts.service';
+import { AccountsTransactionsService } from '../accounts/transactions/accounts-transactions.service';
+import { OutcomesRepository } from '../outcomes/outcomes.repository';
+import { Money } from '../common/money/money';
+import { Odds } from '../common/money/odds';
 
 @Injectable()
 export class BetsService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly betsRepository: BetsRepository,
+    private readonly accountsService: AccountsService,
+    private readonly accountsTransactionsService: AccountsTransactionsService,
+    private readonly outcomesRepository: OutcomesRepository,
+  ) {}
 
-  async createBet(createBetDto: CreateBetDto) {
-    await this.usersService.getUserById(String(createBetDto.userId));
+  async createBet(dto: CreateBetDto, userId: number): Promise<BetResponseDto> {
+  const outcome = await this.outcomesRepository.findById(dto.outcomeId);
+  if (!outcome) {
+    throw new NotFoundException(`Outcome with id ${dto.outcomeId} not found`);
+  }
+  if (outcome.status !== 'open') {
+    throw new BadRequestException('Outcome is not open for betting');
+  }
 
+  const accountId = await this.accountsService.getPrimaryAccountId(userId);
+
+  const odds = new Odds(outcome.odds);
+  const stake = new Money(dto.stake);
+  const potentialPayout = odds.calculatePayout(stake);
+
+  await this.accountsTransactionsService.debit(accountId, dto.stake);
+
+  const bet = await this.betsRepository.create({
+    user_id: userId,          // ← теперь из параметра, а не из dto
+    outcome_id: dto.outcomeId,
+    stake: stake.toFixed(2),
+    odds: odds.toFixed(2),
+    potential_payout: potentialPayout.toFixed(2),
+    status: 'PENDING',
+  });
+
+  return this.toResponse(bet);
+}
+
+  async getUserBets(userId: number): Promise<BetResponseDto[]> {
+    const bets = await this.betsRepository.findByUserId(userId);
+    return bets.map((bet) => this.toResponse(bet));
+  }
+
+  private toResponse(bet: Bet): BetResponseDto {
     return {
-      id: 1,
-      ...createBetDto,
-      status: 'PENDING',
+      id: bet.id,
+      userId: bet.user_id,
+      outcomeId: bet.outcome_id,
+      stake: bet.stake,
+      odds: bet.odds,
+      potentialPayout: bet.potential_payout,
+      status: bet.status,
+      createdAt: bet.created_at,
     };
   }
 }

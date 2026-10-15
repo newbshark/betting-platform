@@ -2,10 +2,15 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BetsModule } from './bets/bets.module';
-import { AppConfigModule } from './config/config.module';
+import { AppConfigModule } from './common/config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { LoggerModule } from './logger/logger.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { UsersModule } from './users/users.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { EventsModule } from './events/events.module';
+import { OutcomesModule } from './outcomes/outcomes.module';
+import { EmailModule } from './common/email-service/email.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +18,11 @@ import { UsersModule } from './users/users.module';
     LoggerModule,
     DatabaseModule,
     UsersModule,
+    AuthModule,
+    EmailModule,
+    EventsModule,
+    AccountsModule,
+    OutcomesModule,
     BetsModule,
   ],
   controllers: [AppController],

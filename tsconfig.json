@@ -1,5 +1,4 @@
 {
-
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -22,7 +21,16 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
-
+    "noFallthroughCasesInSwitch": false,
+    "strict": true,
+    "strictPropertyInitialization": false,
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "knexfile.ts",
+    "dist"
+  ]
 }

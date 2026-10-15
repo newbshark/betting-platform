@@ -11,7 +11,7 @@ export interface DatabaseConfig {
 
 @Injectable()
 export class AppConfigService {
-  constructor(private readonly nestConfigService: NestConfigService) {}
+  constructor(private readonly nestConfigService: NestConfigService) { }
 
   get nodeEnv(): string {
     return this.nestConfigService.get<string>('NODE_ENV', 'development');
@@ -39,5 +39,13 @@ export class AppConfigService {
         'betting_platform',
       ),
     };
+  }
+  get jwtSecret(): string {
+    const secret = this.nestConfigService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET is not set in .env');
+    }
+    return secret;
+
   }
 }
